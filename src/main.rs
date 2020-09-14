@@ -2,7 +2,6 @@ extern crate dirs;
 
 mod options;
 mod config;
-mod oshelper;
 mod defaults;
 
 fn main() {

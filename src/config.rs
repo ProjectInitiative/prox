@@ -89,18 +89,33 @@ impl AppConfig
         }
         
         let mut read_attempt = self.open_read_config();
-        
+
         if(read_attempt.is_empty())
         {
-            //TODO: check all keys in the "defaults" hashmap to make sure the config contains
-            // said keys, if not add all missing keys with defaults
-
             // populate new file with default values
             self.save(&self.default_values);
-            return self.open_read_config();
+            read_attempt = self.default_values.clone();
+        }
+        else
+        {
+            // loop through the default values and make sure there are not
+            // any missing keys in the config file. if there are, insert them
+            let mut added_value = false;
+            for (key, value) in &self.default_values
+            {
+                if !read_attempt.contains_key(&key.to_string())
+                {
+                    read_attempt.insert(key.to_string(), value.to_string());
+                    added_value = true;
+                    println!("default value missing: {}",key.to_string())
+                }
+            }
+            if added_value
+            {
+                self.save(&read_attempt);
+            }
         }
         read_attempt
-        
     }
     
     pub fn save(&self, config: &HashMap<String, String>) {
