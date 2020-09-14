@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 clap = "2.33.1"
 config = "0.10.1"
+dirs = "3.0.1"
