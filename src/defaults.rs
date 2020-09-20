@@ -2,7 +2,6 @@
 
 use std::collections::HashMap;
 
-
 pub fn default_values() -> HashMap<String, String>
 {
     let mut values: HashMap<String, String> = HashMap::new();
