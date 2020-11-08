@@ -63,7 +63,14 @@ impl FromDataSimple for VMInfo
         }
         
         // add error checking for the JSON deserialization
-        Success(serde_json::from_str(&string).unwrap())
+        let deserialization = serde_json::from_str(&string);
+        match deserialization
+        {
+            Ok(json) => return Success(json),
+            Err(e) => return Failure((Status::InternalServerError, format!("{:?}", e)))
+        };
+        
+        // Success(serde_json::from_str(&string).unwrap())
     }
 }
 
