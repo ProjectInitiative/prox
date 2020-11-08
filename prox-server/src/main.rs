@@ -9,6 +9,7 @@ mod options;
 mod config;
 mod defaults;
 
+use std::time::Duration;
 use rpassword::read_password;
 
 extern crate rand;
@@ -17,8 +18,9 @@ use rand::distributions::Alphanumeric;
 
 use std::{thread, time};
 use std::sync::{Arc, Mutex};
-
 use std::io::Read;
+use std::process::Command;
+
 use rocket::{response::content, State};
 use rocket::{Request, Data, Outcome, Outcome::*};
 use rocket::data::{self, FromDataSimple};
@@ -26,7 +28,7 @@ use rocket::http::{Status, ContentType};
 
 use serde::{Serialize, Deserialize};
 
-static SOME_INT: i32 = 5;
+static POLL_RATE: Duration = Duration::from_millis(1000);
 
 static BASE_URL: &str = "/api/v1";
 const LIMIT: u64 = 256;
@@ -70,7 +72,6 @@ impl FromDataSimple for VMInfo
             Err(e) => return Failure((Status::InternalServerError, format!("{:?}", e)))
         };
         
-        // Success(serde_json::from_str(&string).unwrap())
     }
 }
 
@@ -103,6 +104,46 @@ fn delete_vm_from_queue(vm_to_delete: VMInfo) -> content::Json<String>
     content::Json("".to_string())
 }
 
+fn poll_vm_queue(queue: Arc<Mutex<Vec<VMInfo>>>)
+{
+    loop
+    {
+        if !queue.lock().unwrap().is_empty()
+        {
+
+            let output = Command::new("sh")
+                                .arg("-c")
+                                .arg(format!("qm status {0}", queue.lock().unwrap()[0].id))
+                                .output()
+                                .expect("failed to execute process");
+    
+            let qemu_status = output.stdout;
+            println!("{}",std::str::from_utf8(&qemu_status).unwrap());
+            if std::str::from_utf8(&qemu_status).unwrap().contains("stopped")
+            {
+                if queue.lock().unwrap().len() >= 2
+                {
+                    //attempt to start the next VM in the queue
+                    let output = Command::new("sh")
+                                    .arg("-c")
+                                    .arg(format!("qm start {0}", queue.lock().unwrap()[1].id))
+                                    .output()
+                                    .expect("failed to execute process");
+                    
+                    let qemu_status = output.stdout;
+                    println!("{}",std::str::from_utf8(&qemu_status).unwrap());
+                    if std::str::from_utf8(&qemu_status).unwrap().contains("running")
+                    {
+                        //remove old VM from the list
+                        queue.lock().unwrap().pop();
+                    }
+                }
+            }
+        }
+        thread::sleep(POLL_RATE);
+    }
+}
+
 fn main() {
     let _matches = options::get_matches();
     let app_config = config::AppConfig::new("prox".to_string(), ".toml".to_string(), defaults::default_values());
@@ -120,8 +161,10 @@ fn main() {
             .collect::<String>();
     println!("{}",key);
 
+    let poll_queue = vm_queue.clone();
     thread::spawn(move || {
         // some work here
+        poll_vm_queue(poll_queue);
     });
     
     rocket::ignite()
