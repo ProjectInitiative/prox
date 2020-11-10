@@ -23,6 +23,7 @@ git clone https://github.com/ProjectInitiative/prox.git
 
 ```bash
 cd prox/prox-server
+rustup override set nightly
 cargo build --release
 ```
 
@@ -32,6 +33,7 @@ This will produce a `prox-server` executable under `prox-server/target/release/`
 
 ```bash
 cd prox/prox-client
+rustup override set nightly
 cargo build --release
 ```
 This will produce a `prox-client` executable under `prox-client/release/` directory
@@ -63,3 +65,4 @@ This will produce a `prox-client.exe` windows executable under `prox-client/targ
 
 ## Additional information
 
+[Install rust toolchain](https://rustup.rs/)
