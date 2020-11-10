@@ -8,7 +8,10 @@ extern crate rpassword;
 mod options;
 mod config;
 mod defaults;
+mod vminfo;
 
+use crate::vminfo::VMInfo;
+use crate::vminfo::VMInfoList;
 use std::time::Duration;
 use rpassword::read_password;
 
@@ -18,62 +21,16 @@ use rand::distributions::Alphanumeric;
 
 use std::{thread, time};
 use std::sync::{Arc, Mutex};
-use std::io::Read;
+
 use std::process::Command;
 
 use rocket::{response::content, State};
-use rocket::{Request, Data, Outcome, Outcome::*};
-use rocket::data::{self, FromDataSimple};
-use rocket::http::{Status, ContentType};
 
-use serde::{Serialize, Deserialize};
 
 static POLL_RATE: Duration = Duration::from_millis(1000);
 
 static BASE_URL: &str = "/api/v1";
-const LIMIT: u64 = 256;
 
-#[derive(Serialize, Deserialize)]
-struct VMInfoList
-{
-    vm_queue: Vec<VMInfo>,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-struct VMInfo
-{
-    title: String,
-    description: String,
-    id: i32,
-}
-
-impl FromDataSimple for VMInfo
-{
-    type Error = String;
-
-    fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
-        // Ensure the content type is correct before opening the data.
-        let vm_info_ct = ContentType::new("application", "json");
-        if req.content_type() != Some(&vm_info_ct) {
-            return Outcome::Forward(data);
-        }
-
-        // Read the data into a String.
-        let mut string = String::new();
-        if let Err(e) = data.open().take(LIMIT).read_to_string(&mut string) {
-            return Failure((Status::InternalServerError, format!("{:?}", e)));
-        }
-        
-        // add error checking for the JSON deserialization
-        let deserialization = serde_json::from_str(&string);
-        match deserialization
-        {
-            Ok(json) => return Success(json),
-            Err(e) => return Failure((Status::InternalServerError, format!("{:?}", e)))
-        };
-        
-    }
-}
 
 #[get("/")]
 fn index() -> String
