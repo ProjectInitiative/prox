@@ -25,7 +25,6 @@ pub fn vms_in_queue(queue: State<Arc<Mutex<Vec<VMInfo>>>>) -> content::Json<Stri
 #[post("/add-vm-to-queue", format = "application/json", data = "<vm_to_add>")]
 pub fn add_vm_to_queue(queue: State<Arc<Mutex<Vec<VMInfo>>>>, vm_to_add: VMInfo) -> content::Json<String>
 {
-    // println!("hello");
     queue.lock().unwrap().push(vm_to_add);
     content::Json("".to_string())
 }
