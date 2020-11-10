@@ -9,9 +9,10 @@ mod options;
 mod config;
 mod defaults;
 mod vminfo;
+mod apiv1;
 
+use crate::apiv1::*;
 use crate::vminfo::VMInfo;
-use crate::vminfo::VMInfoList;
 use std::time::Duration;
 use rpassword::read_password;
 
@@ -29,37 +30,6 @@ use rocket::{response::content, State};
 
 static POLL_RATE: Duration = Duration::from_millis(1000);
 
-static BASE_URL: &str = "/api/v1";
-
-
-#[get("/")]
-fn index() -> String
-{
-    format!("Hello!\nOne day I will add a nice UI or instructions to setup and view via a web interface!")
-}
-
-#[get("/vms-in-queue")]
-fn vms_in_queue(queue: State<Arc<Mutex<Vec<VMInfo>>>>) -> content::Json<String>
-{   
-    let vm_info = VMInfoList { vm_queue: queue.lock().unwrap().clone() };
-    content::Json(serde_json::to_string(&vm_info).unwrap())
-}
-
-
-#[post("/add-vm-to-queue", format = "application/json", data = "<vm_to_add>")]
-fn add_vm_to_queue(queue: State<Arc<Mutex<Vec<VMInfo>>>>, vm_to_add: VMInfo) -> content::Json<String>
-{
-    // println!("hello");
-    queue.lock().unwrap().push(vm_to_add);
-    content::Json("".to_string())
-}
-
-#[delete("/delete-vm-from-queue", format = "application/json", data = "<vm_to_delete>")]
-fn delete_vm_from_queue(vm_to_delete: VMInfo) -> content::Json<String>
-{
-
-    content::Json("".to_string())
-}
 
 fn poll_vm_queue(queue: Arc<Mutex<Vec<VMInfo>>>)
 {
@@ -127,7 +97,7 @@ fn main() {
     rocket::ignite()
         .manage(vm_queue)
         .mount("/", routes![index])
-        .mount(BASE_URL, routes![vms_in_queue, add_vm_to_queue])
+        .mount(BASE_URL_V1, routes![vms_in_queue, add_vm_to_queue])
         .launch();
     
     
