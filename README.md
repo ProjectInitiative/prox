@@ -68,3 +68,8 @@ This will produce a `prox-client.exe` windows executable under `prox-client/targ
 [Install rust toolchain](https://rustup.rs/)
 
 [Rust Debugging VSCode](https://www.forrestthewoods.com/blog/how-to-debug-rust-with-visual-studio-code/)
+
+Example command:
+```bash
+curl localhost:8000/api/v1/add-vm-to-queue -H "Content-Type: application/json" --data '{"title":"test1","id":45,"description":"testVM"}'
+```
