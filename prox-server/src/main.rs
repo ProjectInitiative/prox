@@ -37,10 +37,10 @@ fn poll_vm_queue(queue: Arc<Mutex<Vec<VMInfo>>>)
     {
         if !queue.lock().unwrap().is_empty()
         {
-
+            let active_vm = queue.lock().unwrap()[0].clone();
             let output = Command::new("sh")
                                 .arg("-c")
-                                .arg(format!("qm status {0}", queue.lock().unwrap()[0].id))
+                                .arg(format!("qm status {0}", active_vm.id))
                                 .output()
                                 .expect("failed to execute process");
     
@@ -50,24 +50,26 @@ fn poll_vm_queue(queue: Arc<Mutex<Vec<VMInfo>>>)
             {
                 if queue.lock().unwrap().len() >= 2
                 {
-                    //attempt to start the next VM in the queue
+                    let next_vm = queue.lock().unwrap()[1].clone();
                     let output = Command::new("sh")
                                     .arg("-c")
-                                    .arg(format!("ls"))
+                                    .arg(format!("qm start {0}", next_vm.id))
                                     .output()
                                     .expect("failed to execute process");
-                    // let output = Command::new("sh")
-                    //                 .arg("-c")
-                    //                 .arg(format!("qm start {0}", queue.lock().unwrap()[1].id))
-                    //                 .output()
-                    //                 .expect("failed to execute process");
+                    
+                    let output = Command::new("sh")
+                                    .arg("-c")
+                                    .arg(format!("qm status {0}", next_vm.id))
+                                    .output()
+                                    .expect("failed to execute process");
                     
                     let qemu_status = output.stdout;
                     println!("{}",std::str::from_utf8(&qemu_status).unwrap());
                     if std::str::from_utf8(&qemu_status).unwrap().contains("running")
                     {
                         //remove old VM from the list
-                        queue.lock().unwrap().pop();
+                        queue.lock().unwrap().remove(0);
+                        println!("{0} VM removed from queue", active_vm.title);
                     }
                 }
             }
