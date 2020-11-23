@@ -23,11 +23,13 @@ git clone https://github.com/ProjectInitiative/prox.git
 
 ```bash
 cd prox/prox-server
+rustup target add x86_64-unknown-linux-musl
 rustup override set nightly
 cargo build --release
 ```
 
 This will produce a `prox-server` executable under `prox-server/target/release/` directory
+The MUSL target needs to be added since most Proxmox installations do not ship with the bleeding edge version of glibc. The MUSL target will create a truly static binary for the server. 
 
 ### Build the client
 
@@ -73,3 +75,14 @@ Example command:
 ```bash
 curl localhost:8000/api/v1/add-vm-to-queue -H "Content-Type: application/json" --data '{"title":"test1","id":45,"description":"testVM"}'
 ```
+
+## TODOS:
+
+  * Build client program - possibly GUI
+  * Add in API key support
+  * Config updates:
+    * Change port number
+    * Which mode? dynamic queue or alternative static list?
+    * API endpoints to check modes, switch modes, and update modes
+    * Store queue and static list to disk for powerloss retention
+  * Add logging
