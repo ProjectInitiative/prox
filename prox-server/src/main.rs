@@ -53,9 +53,14 @@ fn poll_vm_queue(queue: Arc<Mutex<Vec<VMInfo>>>)
                     //attempt to start the next VM in the queue
                     let output = Command::new("sh")
                                     .arg("-c")
-                                    .arg(format!("qm start {0}", queue.lock().unwrap()[1].id))
+                                    .arg(format!("ls"))
                                     .output()
                                     .expect("failed to execute process");
+                    // let output = Command::new("sh")
+                    //                 .arg("-c")
+                    //                 .arg(format!("qm start {0}", queue.lock().unwrap()[1].id))
+                    //                 .output()
+                    //                 .expect("failed to execute process");
                     
                     let qemu_status = output.stdout;
                     println!("{}",std::str::from_utf8(&qemu_status).unwrap());
