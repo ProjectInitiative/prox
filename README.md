@@ -67,9 +67,13 @@ This will produce a `prox-client.exe` windows executable under `prox-client/targ
 
 ## Additional information
 
-[Install rust toolchain](https://rustup.rs/)
+  * [Install rust toolchain](https://rustup.rs/)
 
-[Rust Debugging VSCode](https://www.forrestthewoods.com/blog/how-to-debug-rust-with-visual-studio-code/)
+  * [Rust Debugging VSCode](https://www.forrestthewoods.com/blog/how-to-debug-rust-with-visual-studio-code/)
+
+  * Makeself was used to create universal installer (for systems like Unraid)
+
+
 
 Example command:
 ```bash

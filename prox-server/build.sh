@@ -12,4 +12,4 @@ mkdir -p "$artifacts/dependencies"
 cp "$publishDir/prox-server" "$artifacts/dependencies"
 cp -r "$sdir/linux-installation-files/"* "$artifacts/dependencies"
 
-makeself "$artifacts/dependencies" "$artifacts/prox-server-$versionNum.run" "prox-server installer for linux" "./prox-server-install"
+makeself "$artifacts/dependencies" "$artifacts/prox-server-$versionNum.run" "prox-server installer for linux" "./prox-server-install.sh"
