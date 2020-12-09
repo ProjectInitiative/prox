@@ -1,0 +1,14 @@
+[Unit]
+Description=Server application for managing VM management over REST API
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+ExecStart=/usr/local/bin/prox-server
+
+[Install]
+WantedBy=multi-user.target
